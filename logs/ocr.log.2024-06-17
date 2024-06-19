@@ -1,0 +1,20 @@
+2024-06-17 15:00:56 - ocr - INFO - load det model using CPU
+2024-06-17 15:00:56 - ocr - INFO - load rec model using CPU
+2024-06-17 15:01:27 - ocr - DEBUG - dt_boxes num : 32, elapsed : 0.14358282089233398
+2024-06-17 15:01:37 - ocr - DEBUG - dt_boxes num : 32, elapsed : 0.1464991569519043
+2024-06-17 15:01:43 - ocr - DEBUG - dt_boxes num : 32, elapsed : 0.14235877990722656
+2024-06-17 15:10:01 - ocr - INFO - load det model using CPU
+2024-06-17 15:10:01 - ocr - INFO - load rec model using CPU
+2024-06-17 15:10:06 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.448103666305542
+2024-06-17 15:24:52 - ocr - INFO - load det model using CPU
+2024-06-17 15:24:53 - ocr - INFO - load rec model using CPU
+2024-06-17 15:25:24 - ocr - INFO - load det model using CPU
+2024-06-17 15:25:25 - ocr - INFO - load rec model using CPU
+2024-06-17 15:26:18 - ocr - INFO - load det model using CPU
+2024-06-17 15:26:18 - ocr - INFO - load rec model using CPU
+2024-06-17 15:27:50 - ocr - INFO - load det model using CPU
+2024-06-17 15:27:50 - ocr - INFO - load rec model using CPU
+2024-06-17 15:28:01 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.21703624725341797
+2024-06-17 16:27:13 - ocr - INFO - load det model using CPU
+2024-06-17 20:05:31 - ocr - INFO - load det model using CPU
+2024-06-17 20:05:31 - ocr - INFO - load rec model using CPU

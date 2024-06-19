@@ -1,0 +1,97 @@
+2024-06-14 16:20:57 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.20499897003173828
+2024-06-14 16:21:05 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.7620058059692383
+2024-06-14 16:23:16 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19221711158752441
+2024-06-14 16:23:18 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1659994125366211
+2024-06-14 16:23:59 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1913585662841797
+2024-06-14 16:24:03 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.5765769481658936
+2024-06-14 16:24:48 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1900625228881836
+2024-06-14 16:24:50 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.47753047943115234
+2024-06-14 16:26:53 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.22168707847595215
+2024-06-14 16:26:53 - ocr - INFO - text recognize: 0.03846383094787598
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.024004697799682617
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.019002914428710938
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.026001453399658203
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.05751180648803711
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.02253270149230957
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.07600092887878418
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.02000141143798828
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.06400108337402344
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.07692170143127441
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.28906726837158203
+2024-06-14 16:26:54 - ocr - INFO - text recognize: 0.0805511474609375
+2024-06-14 16:26:55 - ocr - INFO - text recognize: 0.4969971179962158
+2024-06-14 16:26:56 - ocr - INFO - text recognize: 0.5340018272399902
+2024-06-14 16:26:56 - ocr - INFO - text recognize: 0.25600218772888184
+2024-06-14 16:26:56 - ocr - INFO - text recognize: 0.11200213432312012
+2024-06-14 16:26:56 - ocr - INFO - text recognize: 0.20100831985473633
+2024-06-14 16:26:57 - ocr - INFO - text recognize: 0.2415614128112793
+2024-06-14 16:26:57 - ocr - INFO - text recognize: 0.12135767936706543
+2024-06-14 16:26:57 - ocr - INFO - text recognize: 0.21500492095947266
+2024-06-14 16:26:57 - ocr - INFO - text recognize: 0.20500493049621582
+2024-06-14 16:26:57 - ocr - INFO - text recognize: 0.23644661903381348
+2024-06-14 16:26:58 - ocr - INFO - text recognize: 0.26911044120788574
+2024-06-14 16:26:58 - ocr - INFO - text recognize: 0.19196581840515137
+2024-06-14 16:26:58 - ocr - INFO - text recognize: 0.20515131950378418
+2024-06-14 16:26:58 - ocr - INFO - text recognize: 0.1663818359375
+2024-06-14 16:26:58 - ocr - INFO - text recognize: 0.07199740409851074
+2024-06-14 16:26:59 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.5733163356781006
+2024-06-14 16:27:00 - ocr - INFO - text recognize: 0.5882713794708252
+2024-06-14 16:27:00 - ocr - INFO - text recognize: 0.3400084972381592
+2024-06-14 16:27:00 - ocr - INFO - text recognize: 0.27100253105163574
+2024-06-14 16:27:01 - ocr - INFO - text recognize: 0.152998685836792
+2024-06-14 16:27:01 - ocr - INFO - text recognize: 0.27799129486083984
+2024-06-14 16:27:01 - ocr - INFO - text recognize: 0.28069090843200684
+2024-06-14 16:27:01 - ocr - INFO - text recognize: 0.23354029655456543
+2024-06-14 16:27:02 - ocr - INFO - text recognize: 0.2546050548553467
+2024-06-14 16:27:02 - ocr - INFO - text recognize: 0.1300039291381836
+2024-06-14 16:27:02 - ocr - INFO - text recognize: 0.2200016975402832
+2024-06-14 16:27:02 - ocr - INFO - text recognize: 0.09199643135070801
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.16899967193603516
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.1199944019317627
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.15999865531921387
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.10199618339538574
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.09899115562438965
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.09400510787963867
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.1119992733001709
+2024-06-14 16:27:03 - ocr - INFO - text recognize: 0.07300662994384766
+2024-06-14 16:27:04 - ocr - INFO - text recognize: 0.09099912643432617
+2024-06-14 16:27:04 - ocr - INFO - text recognize: 0.08499836921691895
+2024-06-14 16:27:04 - ocr - INFO - text recognize: 0.08698439598083496
+2024-06-14 16:27:04 - ocr - INFO - text recognize: 0.11400437355041504
+2024-06-14 16:27:04 - ocr - INFO - text recognize: 0.09156298637390137
+2024-06-14 16:27:04 - ocr - INFO - text recognize: 0.10000443458557129
+2024-06-14 16:27:05 - ocr - INFO - text recognize: 0.25960850715637207
+2024-06-14 16:27:05 - ocr - INFO - text recognize: 0.15499281883239746
+2024-06-14 16:30:32 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1997537612915039
+2024-06-14 16:30:42 - ocr - INFO - text recognize:  9.4924s
+2024-06-14 16:30:43 - ocr - DEBUG - dt_boxes num : 27, elapsed : 1.1519978046417236
+2024-06-14 16:30:48 - ocr - INFO - text recognize:  5.5956s
+2024-06-14 16:30:55 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1907179355621338
+2024-06-14 16:31:00 - ocr - INFO - text recognize:  4.3956s
+2024-06-14 16:31:00 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.5186371803283691
+2024-06-14 16:31:06 - ocr - INFO - text recognize:  5.3229s
+2024-06-14 16:31:10 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19974851608276367
+2024-06-14 16:31:15 - ocr - INFO - text recognize:  5.2328s
+2024-06-14 16:31:16 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.5734176635742188
+2024-06-14 16:31:22 - ocr - INFO - text recognize:  5.9863s
+2024-06-14 16:34:14 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.2111508846282959
+2024-06-14 16:34:15 - ocr - INFO - text recognize:  1.6311s
+2024-06-14 16:34:15 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.17499756813049316
+2024-06-14 16:34:17 - ocr - INFO - text recognize:  1.2139s
+2024-06-14 16:34:26 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.20917391777038574
+2024-06-14 16:34:27 - ocr - INFO - text recognize:  1.6264s
+2024-06-14 16:34:28 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.18602991104125977
+2024-06-14 16:34:29 - ocr - INFO - text recognize:  1.2362s
+2024-06-14 16:36:11 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1829833984375
+2024-06-14 16:36:12 - ocr - INFO - text recognize:  1.6727s
+2024-06-14 16:36:13 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1891155242919922
+2024-06-14 16:36:14 - ocr - INFO - text recognize:  1.2810s
+2024-06-14 17:39:58 - ocr - INFO - load det model using CPU
+2024-06-14 17:40:06 - ocr - INFO - load rec model using CPU
+2024-06-14 17:40:46 - ocr - INFO - load rec model using CPU
+2024-06-14 17:46:49 - ocr - INFO - load det model using CPU
+2024-06-14 17:51:47 - ocr - INFO - load det model using CPU
+2024-06-14 17:51:48 - ocr - INFO - load rec model using CPU
+2024-06-14 18:01:33 - ocr - INFO - load det model using CPU
+2024-06-14 18:01:34 - ocr - INFO - load rec model using CPU
+2024-06-14 18:01:41 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.2733190059661865

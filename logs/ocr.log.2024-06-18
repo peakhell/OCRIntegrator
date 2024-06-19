@@ -1,0 +1,100 @@
+2024-06-18 10:49:06 - ocr - INFO - load det model using CPU
+2024-06-18 10:49:07 - ocr - INFO - load rec model using CPU
+2024-06-18 14:14:31 - ocr - INFO - load det model using CPU
+2024-06-18 14:14:32 - ocr - INFO - load rec model using CPU
+2024-06-18 14:25:19 - ocr - INFO - load det model using CPU
+2024-06-18 14:25:19 - ocr - INFO - load rec model using CPU
+2024-06-18 14:26:37 - ocr - INFO - load det model using CPU
+2024-06-18 14:26:37 - ocr - INFO - load rec model using CPU
+2024-06-18 14:28:06 - ocr - INFO - load det model using CPU
+2024-06-18 14:28:06 - ocr - INFO - load rec model using CPU
+2024-06-18 14:29:14 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.22570323944091797
+2024-06-18 14:29:21 - ocr - INFO - text recognize:  7.5858s
+2024-06-18 14:29:21 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19600152969360352
+2024-06-18 14:29:23 - ocr - INFO - text recognize:  1.4050s
+2024-06-18 14:29:27 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.20313286781311035
+2024-06-18 14:29:29 - ocr - INFO - text recognize:  1.7348s
+2024-06-18 14:29:29 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.16953063011169434
+2024-06-18 14:29:31 - ocr - INFO - text recognize:  1.6866s
+2024-06-18 14:30:06 - ocr - INFO - load det model using CPU
+2024-06-18 14:30:06 - ocr - INFO - load rec model using CPU
+2024-06-18 14:30:16 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.21504545211791992
+2024-06-18 14:30:18 - ocr - INFO - text recognize:  2.8568s
+2024-06-18 14:30:19 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.39388060569763184
+2024-06-18 14:30:26 - ocr - INFO - text recognize:  6.7143s
+2024-06-18 14:30:31 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1990206241607666
+2024-06-18 14:30:35 - ocr - INFO - text recognize:  4.6157s
+2024-06-18 14:30:36 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.47757887840270996
+2024-06-18 14:30:41 - ocr - INFO - text recognize:  5.4971s
+2024-06-18 14:30:52 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.23916840553283691
+2024-06-18 14:30:54 - ocr - INFO - text recognize:  1.7017s
+2024-06-18 14:30:54 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1866309642791748
+2024-06-18 14:31:00 - ocr - INFO - text recognize:  5.4889s
+2024-06-18 14:31:42 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19507098197937012
+2024-06-18 14:31:44 - ocr - INFO - text recognize:  1.6526s
+2024-06-18 14:31:44 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.24195098876953125
+2024-06-18 14:31:45 - ocr - INFO - text recognize:  1.3402s
+2024-06-18 14:31:50 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19405198097229004
+2024-06-18 14:31:53 - ocr - INFO - text recognize:  2.6762s
+2024-06-18 14:31:54 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.45612263679504395
+2024-06-18 14:31:59 - ocr - INFO - text recognize:  5.0198s
+2024-06-18 14:32:13 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.20422792434692383
+2024-06-18 14:32:15 - ocr - INFO - text recognize:  1.6225s
+2024-06-18 14:32:15 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1721799373626709
+2024-06-18 14:32:16 - ocr - INFO - text recognize:  1.2286s
+2024-06-18 14:37:17 - ocr - INFO - load det model using CPU
+2024-06-18 14:37:17 - ocr - INFO - load rec model using CPU
+2024-06-18 14:38:43 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19113421440124512
+2024-06-18 14:38:48 - ocr - INFO - text recognize:  5.1344s
+2024-06-18 14:38:49 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.17697739601135254
+2024-06-18 14:38:50 - ocr - INFO - text recognize:  1.3016s
+2024-06-18 14:39:03 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.16736173629760742
+2024-06-18 14:39:08 - ocr - INFO - text recognize:  4.9149s
+2024-06-18 14:39:08 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.15796804428100586
+2024-06-18 14:39:09 - ocr - INFO - text recognize:  1.1849s
+2024-06-18 14:40:02 - ocr - INFO - load det model using CPU
+2024-06-18 14:40:02 - ocr - INFO - load rec model using CPU
+2024-06-18 14:40:10 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.21499300003051758
+2024-06-18 14:40:12 - ocr - INFO - text recognize:  1.7323s
+2024-06-18 14:40:12 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.22760891914367676
+2024-06-18 14:40:14 - ocr - INFO - text recognize:  1.3483s
+2024-06-18 14:41:07 - ocr - INFO - load det model using CPU
+2024-06-18 14:41:07 - ocr - INFO - load rec model using CPU
+2024-06-18 14:41:12 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.18400835990905762
+2024-06-18 14:41:13 - ocr - INFO - text recognize:  1.6381s
+2024-06-18 14:41:14 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.18621540069580078
+2024-06-18 14:41:15 - ocr - INFO - text recognize:  1.5033s
+2024-06-18 14:41:45 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.2760345935821533
+2024-06-18 14:41:47 - ocr - INFO - text recognize:  1.9156s
+2024-06-18 14:41:47 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.22019743919372559
+2024-06-18 14:41:49 - ocr - INFO - text recognize:  1.5369s
+2024-06-18 14:44:54 - ocr - INFO - load det model using CPU
+2024-06-18 14:44:54 - ocr - INFO - load rec model using CPU
+2024-06-18 14:45:13 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.21141552925109863
+2024-06-18 14:45:15 - ocr - INFO - text recognize:  1.7084s
+2024-06-18 14:45:15 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.1773231029510498
+2024-06-18 14:45:16 - ocr - INFO - text recognize:  1.2210s
+2024-06-18 15:47:02 - ocr - INFO - load det model using CPU
+2024-06-18 15:47:02 - ocr - INFO - load rec model using CPU
+2024-06-18 15:47:46 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.306135892868042
+2024-06-18 15:47:48 - ocr - INFO - text recognize:  2.0154s
+2024-06-18 15:47:48 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19913554191589355
+2024-06-18 15:47:50 - ocr - INFO - text recognize:  1.6028s
+2024-06-18 16:32:23 - ocr - INFO - load det model using CPU
+2024-06-18 16:32:23 - ocr - INFO - load rec model using CPU
+2024-06-18 16:32:27 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.25034570693969727
+2024-06-18 16:32:29 - ocr - INFO - text recognize:  1.9694s
+2024-06-18 16:32:30 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19987750053405762
+2024-06-18 16:32:31 - ocr - INFO - text recognize:  1.8479s
+2024-06-18 16:32:36 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.23866558074951172
+2024-06-18 16:32:38 - ocr - INFO - text recognize:  1.9371s
+2024-06-18 16:32:39 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.19609642028808594
+2024-06-18 16:32:40 - ocr - INFO - text recognize:  1.5383s
+2024-06-18 16:32:45 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.2226705551147461
+2024-06-18 16:32:47 - ocr - INFO - text recognize:  2.0974s
+2024-06-18 16:32:47 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.24273419380187988
+2024-06-18 16:32:49 - ocr - INFO - text recognize:  1.5006s
+2024-06-18 16:33:02 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.20260882377624512
+2024-06-18 16:33:04 - ocr - INFO - text recognize:  2.1173s
+2024-06-18 16:33:04 - ocr - DEBUG - dt_boxes num : 27, elapsed : 0.2070455551147461
+2024-06-18 16:33:06 - ocr - INFO - text recognize:  1.4398s
