@@ -8,7 +8,7 @@ log_config = {
 
     "loggers": {
         "": {
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["consoleHandler"],
         },
         "ocr": {
@@ -28,7 +28,7 @@ log_config = {
         },
         "OcrHandler": {
             "class": "logging.handlers.ConcurrentTimedRotatingFileHandler",
-            "level": "DEBUG",
+            "level": "INFO",
             "formatter": "defaultFormatter",
             "when": "midnight",
             "filename": os.path.join(os.path.abspath(os.getenv('LOG_PATH', './logs')), 'ocr.log'),
@@ -40,7 +40,7 @@ log_config = {
 
     "formatters": {
         "defaultFormatter": {
-            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "format": "%(asctime)s - %(levelname)s - %(pathname)s - line %(lineno)d - %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S"
         }
     }

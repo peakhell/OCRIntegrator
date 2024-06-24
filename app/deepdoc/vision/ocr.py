@@ -454,7 +454,6 @@ class TextDetector(metaclass=SingletonMeta):
         shape_list = np.expand_dims(shape_list, axis=0)
         img = img.copy()
         input_dict = {"x": img}
-        print(img.shape)
         try:
             outputs = TextDetector._predictor.run(None, input_dict)
         except Exception as e:
@@ -551,8 +550,7 @@ class OCR(object):
             time_dict['all'] = end - start
             return None, None, time_dict
         else:
-            logger.debug("dt_boxes num : {}, elapsed : {}".format(
-                len(dt_boxes), elapse))
+            logger.debug(f"dt_boxes num : {len(dt_boxes)}, elapsed : {elapse :.4f}s")
 
         return zip(self.sorted_boxes(dt_boxes), [
                    ("", 0) for _ in range(len(dt_boxes))])
@@ -563,7 +561,7 @@ class OCR(object):
             img_crops.append(self.get_rotate_crop_image(ori_im, box))
 
         rec_res, elapse = self.text_recognizer(img_crops)
-        logger.info(f"recognize {len(boxes)} elapse: {elapse}")
+        logger.info(f"recognize model predict {len(img_crops)} box elapse : {elapse :.4f}s")
         result = []
         for each in rec_res:
             if each[1] < self.drop_score:
@@ -588,7 +586,7 @@ class OCR(object):
             time_dict['all'] = end - start
             return None, None, time_dict
         else:
-            logger.debug("dt_boxes num : {}, elapsed : {}".format(len(dt_boxes), elapse))
+            logger.debug(f"detect model predict {len(dt_boxes)} dt_boxes, elapsed {elapse :.4f}s")
         img_crop_list = []
 
         dt_boxes = self.sorted_boxes(dt_boxes)
@@ -601,7 +599,7 @@ class OCR(object):
         rec_res, elapse = self.text_recognizer(img_crop_list)
 
         time_dict['rec'] = elapse
-        logger.info("rec_res num  : {}, elapsed : {}".format(len(rec_res), elapse))
+        logger.info(f"rec_res num  : {len(rec_res)}, elapsed : {elapse :.4f}")
 
         filter_boxes, filter_rec_res = [], []
         for box, rec_result in zip(dt_boxes, rec_res):
