@@ -1,4 +1,4 @@
-# OCRIntegrator-
+# OCRIntegrator
 封装开源的OCR模型，表格检测，布局识别等能力，以统一接口方式提供服务。 目前只集成了deepdoc,后续会提供更多的服务集成
 
 ## Introduce
