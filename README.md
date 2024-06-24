@@ -1,32 +1,37 @@
+- zh_CN [简体中文](README.zh.md)
+- en [English](README.md)
 # OCRIntegrator
-封装开源的OCR模型，表格检测，布局识别等能力，以统一接口方式提供服务。 目前只集成了deepdoc,后续会提供更多的服务集成
+Encapsulates open-source OCR models, table detection, layout recognition, and other capabilities, 
+providing services through a unified interface. Currently, only deepdoc is integrated, 
+with more services to be integrated in the future.
 
 ## Introduce
-1. deepdoc中使用pdfplumber读取文本，同时使用OCR识别文字，优先取pdfplumber中的文本，扫描件则完全使用OCR识别的文本。
+1. In deepdoc, pdfplumber is used to read text, while OCR is used to recognize text.
+    The text from pdfplumber is preferred, and OCR is used entirely for scanned documents.
 ## 🎬 Get Started
 ### 📝 Prerequisites
-* python >= 3.11  建议使用conda
+* python >= 3.11  (recommended to use conda)
 * GPU > 2G
 * tensorrt == 10.0.1  
-* CUDA == 12.3  (理论上其他版本也可以，但没有实测过)
+* CUDA == 12.3  (other versions may work theoretically, but have not been tested)
 ### 运行环境
-1. python11，建议使用conda安装
-2. 安装poetry,
+1. Install Python 3.11, recommended to use conda.
+2. Install poetry:
    ```shell
     curl -sSL https://install.python-poetry.org | python3 -
     ```
-3. 使用poetry安装依赖
+3. Install dependencies using poetry:
     `poetry install `
-4. 项目运行
+4. Run the project:
     `uvicorn main:app`
 
-### GPU下需要安装tensorrt运行
-1. 安装tensorrt, 注意需要根据cuda版本修改tensorrt-cu12的名称。
+### Running with GPU requires installing TensorRT
+Install TensorRT, note that the name of tensorrt-cu12 needs to be modified according to the CUDA version.
    ```shell
    pip install tensorrt==10.0.1
    pip install tensorrt-cu12==10.0.1
    ```
-下面是我的环境截图，可以参考
+Below are screenshots of my environment for reference:
 
 ![img.png](imgs/nvidia-smi.png)
 ![img.png](imgs/tensorrt_version.png)
@@ -34,6 +39,6 @@
 ## DEMO
 ![img.png](imgs/demo.png)
 
-## 接口文档
-启动后可以通过文档查看使用方法
+## API Documentation
+After starting, you can view the usage methods through the documentation: http://localhost:8000/docs
 http://localhost:8000/docs
