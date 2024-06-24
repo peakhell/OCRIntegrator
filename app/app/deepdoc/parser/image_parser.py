@@ -929,7 +929,7 @@ class ImageParser:
                 chars[j]["text"] += " "
             j += 1
         self._ocr(1, self.page_images[0], chars, zoomin)
-        logger.info("OCR:", timer()-st)
+        logger.info(f"OCR: {timer()-st :.4f}s")
         self.page_cum_height = np.cumsum(self.page_cum_height)
         return self.boxes
 

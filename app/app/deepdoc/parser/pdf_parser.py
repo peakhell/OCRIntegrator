@@ -240,7 +240,11 @@ class RAGFlowPdfParser:
                 b["SP"] = ii
 
     def _ocr(self, pagenum, img, chars, ZM=3):
+        start = time.time()
         bxs = self.ocr.detect(np.array(img))
+        logger.info("\n")
+        logger.info(f"################## start to process page {pagenum} ##################")
+        logger.info(f"detect page {pagenum} elapse time: {time.time() - start :.4f}s")
         if not bxs:
             self.boxes.append([])
             return
@@ -254,8 +258,8 @@ class RAGFlowPdfParser:
         )
 
         # merge chars in the same rect
-        for c in Recognizer.sort_X_firstly(
-                chars, self.mean_width[pagenum - 1] // 4):
+        start = time.time()
+        for c in Recognizer.sort_X_firstly(chars, self.mean_width[pagenum - 1] // 4):
             ii = Recognizer.find_overlapped(c, bxs)
             if ii is None:
                 self.lefted_chars.append(c)
@@ -270,7 +274,7 @@ class RAGFlowPdfParser:
                     bxs[ii]["text"] += " "
             else:
                 bxs[ii]["text"] += c["text"]
-        start = time.time()
+        logger.info(f"merge page {pagenum} elapse time: {time.time()-start :.4f}s")
         # 原本为一个box一个box推理，无法发挥GPU并行推理的优势， 这里改成按照batch_size=32进行推理，提高推理性能
         modify_idx = []
         matrix = []
@@ -280,14 +284,16 @@ class RAGFlowPdfParser:
                                          ZM, b["top"] * ZM, b["bottom"] * ZM
                 modify_idx.append(idx)
                 matrix.append(np.array([[left, top], [right, top], [right, bott], [left, bott]], dtype=np.float32))
+        start = time.time()
         text_result = self.ocr.recognize(np.array(img), matrix)
+        logger.info(f"recognize page {pagenum} elapse time: {time.time() - start :.4f}s")
         for i, idx in enumerate(modify_idx):
             bxs[idx]["text"] = text_result[i]
-        logger.info(f"text recognize: {time.time()-start : .4f}s")
         bxs = [b for b in bxs if b["text"]]
         if self.mean_height[-1] == 0:
             self.mean_height[-1] = np.median([b["bottom"] - b["top"]
                                               for b in bxs])
+        logger.info(f"################## process finished page {pagenum} ##################\n")
         self.boxes.append(bxs)
 
     def _layouts_rec(self, ZM, drop=True):
@@ -974,11 +980,10 @@ class RAGFlowPdfParser:
                                                                        chars[j]["width"]) / 2:
                     chars[j]["text"] += " "
                 j += 1
-
+            start = time.time()
             self._ocr(i + 1, img, chars, zoomin)
-            if callback and i % 6 == 5:
-                callback(prog=(i + 1) * 0.6 / len(self.page_images), msg="")
-        logger.info("OCR Elapsed Time:", timer()-st)
+            logger.info(f"OCR: page {i+1} cost time: {time.time() - start}")
+        logger.info(f"OCR Elapsed Time: {timer()-st :.4f}")
 
         if not self.is_english and not any(
                 [c for c in self.page_chars]) and self.boxes:

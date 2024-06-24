@@ -1,5 +1,6 @@
 import time
 from typing import Dict, List, Union
+from app.config.logger import logger
 import tensorrt as trt
 import pycuda.driver as cuda
 import numpy as np
@@ -9,22 +10,23 @@ TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 
 
 def load_engine(path):
-    print("Start loading engine")
+    logger.info("Start loading engine")
+    start = time.time()
     with open(path, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
         engine = runtime.deserialize_cuda_engine(f.read())
-    print('Completed loading engine')
+    logger.info(f'Completed loading {path} engine in {time.time() - start :.4f}s')
     return engine
 
 
 class OutputAllocator(trt.IOutputAllocator):
     def __init__(self):
-        print("[MyOutputAllocator::__init__]")
         super().__init__()
         self.buffers = {}
         self.shapes = {}
 
     def reallocate_output(self, tensor_name: str, memory: int, size: int, alignment: int) -> int:
-        print("[MyOutputAllocator::reallocate_output] TensorName=%s, Memory=%s, Size=%d, Alignment=%d" % (tensor_name, memory, size, alignment))
+        # logger.debug("[MyOutputAllocator::reallocate_output] TensorName=%s, Memory=%s, Size=%d, Alignment=%d" %
+        #             (tensor_name, memory, size, alignment))
         if tensor_name in self.buffers:
             del self.buffers[tensor_name]
 
@@ -33,7 +35,7 @@ class OutputAllocator(trt.IOutputAllocator):
         return int(address)
 
     def notify_shape(self, tensor_name: str, shape: trt.Dims):
-        print("[MyOutputAllocator::notify_shape] TensorName=%s, Shape=%s" % (tensor_name, shape))
+        # logger.debug("[MyOutputAllocator::notify_shape] TensorName=%s, Shape=%s" % (tensor_name, shape))
         self.shapes[tensor_name] = tuple(shape)
 
 
