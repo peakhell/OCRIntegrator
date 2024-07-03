@@ -86,9 +86,9 @@ class LayoutRecognizer(Recognizer):
                     lts_[ii]["visited"] = True
                     keep_feats = [
                         lts_[
-                            ii]["type"] == "footer" and bxs[i]["bottom"] < image_list[pn].shape[1] * 0.9 / scale_factor,
+                            ii]["type"] == "footer" and bxs[i]["bottom"] < image_list[pn].size[1] * 0.9 / scale_factor,
                         lts_[
-                            ii]["type"] == "header" and bxs[i]["top"] > image_list[pn].shape[1] * 0.1 / scale_factor,
+                            ii]["type"] == "header" and bxs[i]["top"] > image_list[pn].size[1] * 0.1 / scale_factor,
                     ]
                     if drop and lts_[
                             ii]["type"] in self.garbage_layouts and not any(keep_feats):
