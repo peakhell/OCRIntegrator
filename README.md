@@ -11,9 +11,10 @@ with more services to be integrated in the future.
 ## 🎬 Get Started
 ### 📝 Prerequisites
 * python >= 3.11  (recommended to use conda)
-* GPU > 2G
+* GPU > 6G
 * tensorrt == 10.0.1  
 * CUDA == 12.3  (other versions may work theoretically, but have not been tested)
+* pycuda == 2024.1
 ### 运行环境
 1. Install Python 3.11, recommended to use conda.
 2. Install poetry:
@@ -26,11 +27,15 @@ with more services to be integrated in the future.
     `uvicorn main:app`
 
 ### Running with GPU requires installing TensorRT
-Install TensorRT, note that the name of tensorrt-cu12 needs to be modified according to the CUDA version.
+1. Install TensorRT, note that the name of tensorrt-cu12 needs to be modified according to the CUDA version.
    ```shell
    pip install tensorrt==10.0.1
    pip install tensorrt-cu12==10.0.1
    ```
+2. Install pycuda
+    ```shell
+    pip install pycuda == 2024.1
+    ```
 Below are screenshots of my environment for reference:
 
 ![img.png](imgs/nvidia-smi.png)

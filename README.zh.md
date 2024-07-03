@@ -8,9 +8,10 @@
 ## 🎬 Get Started
 ### 📝 Prerequisites
 * python >= 3.11  建议使用conda
-* GPU > 2G
+* GPU > 6G
 * tensorrt == 10.0.1  
 * CUDA == 12.3  (理论上其他版本也可以，但没有实测过)
+* pycuda == 2024.1
 ### 运行环境
 1. python11，建议使用conda安装
 2. 安装poetry
@@ -28,6 +29,10 @@
    pip install tensorrt==10.0.1
    pip install tensorrt-cu12==10.0.1
    ```
+2. 安装pycuda
+    ```shell
+    pip install pycuda == 2024.1
+    ```
 下面是我的环境截图，可以参考
 
 ![img.png](imgs/nvidia-smi.png)
