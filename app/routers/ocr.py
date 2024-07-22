@@ -30,7 +30,7 @@ async def detect_ocr_by_file(file: UploadFile = File(...), file_type: str = Form
     return result
 
 
-@router.post("/layout/path")
+@router.post("/ocr/layout/path")
 async def detect_layout_by_path(item: OcrPathModel):
     file_type = item.file_type
     file_path = item.file_path
@@ -38,12 +38,13 @@ async def detect_layout_by_path(item: OcrPathModel):
     return {"result": result}
 
 
-@router.post("/layout/file")
-async def detect_layout_by_file(file: UploadFile = File(...), file_type: str = Form(...)):
+@router.post("/ocr/layout/file")
+async def detect_layout_by_file(file: UploadFile = File(...), file_type: str = Form(...),
+                                zoomin: float = Form(default=3)):
     try:
         OcrFileModel(file_type=file_type)
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=e.errors())
     file_io = io.BytesIO(await file.read())
-    result = ocr_service.detect_layout(file_type, file_io)
+    result = ocr_service.detect_layout(file_type, file_io, zoomin=zoomin)
     return result

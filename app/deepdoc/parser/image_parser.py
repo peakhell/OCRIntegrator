@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import time
 
 import cv2
 import hashlib
@@ -20,6 +21,21 @@ from app.config.logger import logger
 from app.constants import ABS_PATH
 
 logging.getLogger("pdfminer").setLevel(logging.WARNING)
+
+class ImagePage:
+    def __init__(self, image):
+        self.image = image
+
+    def to_image(self, resolution=72):
+        return ImageWrapper(self.image)
+
+class ImageWrapper:
+    def __init__(self, image):
+        self.image = image
+
+    @property
+    def annotated(self):
+        return self.image
 
 
 class ImageParser:
@@ -70,9 +86,7 @@ class ImageParser:
         LEN = 6
         tks_down = rag_tokenizer.tokenize(down["text"][:LEN]).split(" ")
         tks_up = rag_tokenizer.tokenize(up["text"][-LEN:]).split(" ")
-        tks_all = up["text"][-LEN:].strip() \
-                  + (" " if re.match(r"[a-zA-Z0-9]+",
-                                     up["text"][-1] + down["text"][0]) else "") \
+        tks_all = up["text"][-LEN:].strip() + (" " if re.match(r"[a-zA-Z0-9]+", up["text"][-1] + down["text"][0]) else "") \
                   + down["text"][:LEN].strip()
         tks_all = rag_tokenizer.tokenize(tks_all).split(" ")
         fea = [
@@ -144,7 +158,8 @@ class ImageParser:
         return True
 
     def _table_transformer_job(self, ZM):
-        logging.info("Table processing...")
+        logger.info("DETECT TABLE: start...")
+        start = time.time()
         imgs, pos = [], []
         tbcnt = [0]
         MARGIN = 10
@@ -233,8 +248,11 @@ class ImageParser:
                 b["H_left"] = spans[ii]["x0"]
                 b["H_right"] = spans[ii]["x1"]
                 b["SP"] = ii
+        logger.info(f"DETECT TABLE: finished in {time.time() - start :.4f}s")
 
     def _ocr(self, pagenum, img, chars, ZM=3):
+        logger.info("####")
+        logger.info(np.array(img).shape)
         bxs = self.ocr.detect(np.array(img))
         if not bxs:
             self.boxes.append([])
@@ -282,6 +300,8 @@ class ImageParser:
         self.boxes.append(bxs)
 
     def _layouts_rec(self, ZM, drop=True):
+        logger.info("LAYOUT: start...")
+        start = time.time()
         assert len(self.page_images) == len(self.boxes)
         self.boxes, self.page_layout = self.layouter(
             self.page_images, self.boxes, ZM, drop=drop)
@@ -291,8 +311,11 @@ class ImageParser:
                 self.page_cum_height[self.boxes[i]["page_number"] - 1]
             self.boxes[i]["bottom"] += \
                 self.page_cum_height[self.boxes[i]["page_number"] - 1]
+        logger.info(f"LAYOUT: finished in {time.time()-start :.4f}s")
 
     def _text_merge(self):
+        logger.info("TEXT MERGE: start...")
+        start = time.time()
         # merge adjusted boxes
         bxs = self.boxes
 
@@ -347,6 +370,7 @@ class ImageParser:
                 continue
             i += 1
         self.boxes = bxs
+        logger.info(f"TEXT MERGE: finished in {time.time() - start :.4f}s")
 
     def _naive_vertical_merge(self):
         bxs = Recognizer.sort_Y_firstly(
@@ -395,6 +419,8 @@ class ImageParser:
         self.boxes = bxs
 
     def _concat_downward(self, concat_between_pages=True):
+        logger.info("CONCAT DOWNWARD: start...")
+        start = time.time()
         # count boxes in the same row as a feature
         for i in range(len(self.boxes)):
             mh = self.mean_height[self.boxes[i]["page_number"] - 1]
@@ -412,7 +438,14 @@ class ImageParser:
                 j += 1
 
         # concat between rows
-        boxes = deepcopy(self.boxes)
+        boxes = []
+        for box in self.boxes:
+            if box["text"] == "":
+                continue
+            else:
+                boxes.append(box)
+        self.boxes = deepcopy(boxes)
+        # boxes = deepcopy(self.boxes)
         blocks = []
         while boxes:
             chunks = []
@@ -502,6 +535,7 @@ class ImageParser:
             boxes.append(t)
 
         self.boxes = Recognizer.sort_Y_firstly(boxes, 0)
+        logger.info(f"CONCAT DOWNWARD: finished in {time.time()-start :.4f}s")
 
     def _filter_forpages(self):
         if not self.boxes:
@@ -580,6 +614,8 @@ class ImageParser:
 
     def _extract_table_figure(self, need_image, ZM,
                               return_html, need_position):
+        logger.info("EXTRACT TABLE FIGURE: start...")
+        start = time.time()
         tables = {}
         figures = {}
         # extract figure and table boxes
@@ -767,7 +803,7 @@ class ImageParser:
             positions.append(poss)
 
         assert len(positions) == len(res)
-
+        logger.info(f"EXTRACT TABLE FIGURE: finished in {time.time() - start}")
         if need_position:
             return list(zip(res, positions))
         return res
@@ -894,7 +930,9 @@ class ImageParser:
         except Exception as e:
             logging.error(str(e))
 
-    def __images__(self, fnm, zoomin=3, page_from=0, page_to=299, callback=None):
+    def __images__(self, fnm, zoomin=1, page_from=0, page_to=299, callback=None):
+        logger.info("OCR: start...")
+        start = time.time()
         self.lefted_chars = []
         self.mean_height = []
         self.mean_width = []
@@ -905,13 +943,12 @@ class ImageParser:
         self.page_from = page_from
         self.is_english = False
         if isinstance(fnm, str):
-            self.page_images = [cv2.imread(fnm)]
+            self.page_images = [Image.fromarray(cv2.imread(fnm))]
         elif isinstance(fnm, BytesIO):
             np_arr = np.frombuffer(fnm.read(), np.uint8)
-            self.page_images = [cv2.imdecode(np_arr, cv2.IMREAD_COLOR)]
+            self.page_images = [Image.fromarray(cv2.imdecode(np_arr, cv2.IMREAD_COLOR))]
         else:
             raise ValueError("fnm must be str or BytesIO")
-        st = timer()
         chars = []
         self.mean_height.append(
             np.median(sorted([c["height"] for c in chars])) if chars else 0
@@ -919,7 +956,7 @@ class ImageParser:
         self.mean_width.append(
             np.median(sorted([c["width"] for c in chars])) if chars else 8
         )
-        self.page_cum_height.append(self.page_images[0].shape[1] / zoomin)
+        self.page_cum_height.append(self.page_images[0].size[1] / zoomin)
         j = 0
         while j + 1 < len(chars):
             if chars[j]["text"] and chars[j + 1]["text"] \
@@ -929,18 +966,18 @@ class ImageParser:
                 chars[j]["text"] += " "
             j += 1
         self._ocr(1, self.page_images[0], chars, zoomin)
-        logger.info(f"OCR: {timer()-st :.4f}s")
+        logger.info(f"OCR: finished in {time.time()-start :.4f}s")
         self.page_cum_height = np.cumsum(self.page_cum_height)
         return self.boxes
 
-    def __call__(self, fnm, need_image=True, zoomin=3, return_html=False):
+    def __call__(self, fnm, need_image=True, zoomin=1, return_html=True):
         self.__images__(fnm, zoomin)
         self._layouts_rec(zoomin)
         self._table_transformer_job(zoomin)
         self._text_merge()
         # self._filter_forpages()
         tbls = self._extract_table_figure(
-            need_image, zoomin, return_html, False)
+            need_image, zoomin, return_html, True)
         self._concat_downward()
         # return self.__filterout_scraps(deepcopy(self.boxes), zoomin), tbls
         tables = []
@@ -950,13 +987,12 @@ class ImageParser:
             # binary_data = buffer.getvalue()
             # # 将二进制数据转换为 Base64 编码数据
             # base64_data = base64.b64encode(binary_data).decode('utf-8')
-            # TODO 图片存储
             content = tbl[0][1]
-            img_id = hashlib.sha256("".join(content).encode("utf-8")).hexdigest()
-            tables.append({"content": content, "img_id": img_id, "posion": tbl[1]})
+            tables.append({"content": content, "position": tbl[1]})
         result = {
             "boxes": self.boxes,
-            "tables": tables
+            "tables": tables,
+            "page_cum_height": self.page_cum_height.tolist()
         }
         return result
 

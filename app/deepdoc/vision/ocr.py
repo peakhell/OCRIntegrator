@@ -550,7 +550,7 @@ class OCR(object):
             time_dict['all'] = end - start
             return None, None, time_dict
         else:
-            logger.debug(f"dt_boxes num : {len(dt_boxes)}, elapsed : {elapse :.4f}s")
+            logger.debug(f"OCR: detect model. boxes num: {len(dt_boxes)}, elapsed : {elapse :.4f}s")
 
         return zip(self.sorted_boxes(dt_boxes), [
                    ("", 0) for _ in range(len(dt_boxes))])
@@ -561,7 +561,7 @@ class OCR(object):
             img_crops.append(self.get_rotate_crop_image(ori_im, box))
 
         rec_res, elapse = self.text_recognizer(img_crops)
-        logger.info(f"recognize model predict {len(img_crops)} box elapse : {elapse :.4f}s")
+        logger.info(f"OCR: recognize model. predict {len(img_crops)} box elapse : {elapse :.4f}s")
         result = []
         for each in rec_res:
             if each[1] < self.drop_score:

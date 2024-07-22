@@ -1,4 +1,5 @@
 import os
+import torch
 from copy import deepcopy
 
 import onnxruntime as ort
@@ -9,30 +10,55 @@ import logging
 from app.constants import ABS_PATH
 
 
+def load_model(model_dir, nm):
+    model_file_path = os.path.join(model_dir, nm + ".onnx")
+    if not os.path.exists(model_file_path):
+        raise ValueError("not find model file path {}".format(
+            model_file_path))
+
+    options = ort.SessionOptions()
+    options.enable_cpu_mem_arena = False
+    options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+    options.intra_op_num_threads = 2
+    options.inter_op_num_threads = 2
+    logger.info(f"load {nm} model using CPU")
+    sess = ort.InferenceSession(
+        model_file_path,
+        options=options,
+        providers=['CPUExecutionProvider'])
+    return sess, [node.name for node in sess.get_inputs()]
+
+
+def load_model_cuda(model_dir, nm):
+    from app.deepdoc.tensorrt_engine import load_engine, TrtModelEngine
+    import pycuda.autoinit
+    model_file_path = os.path.join(model_dir, nm + ".trt")
+    engine = load_engine(model_file_path)
+    return TrtModelEngine(engine, cuda_ctx=pycuda.autoinit.context), TrtModelEngine.get_input_tensor_names(engine)
+
+
 class Recognizer(object):
+    _predictor = {}
+    _input_tensor = {}
+
     def __init__(self, label_list, task_name, model_dir=None):
         if not model_dir:
-            model_dir = os.path.join(
-                        ABS_PATH,
-                        "res/deepdoc")
-            model_file_path = os.path.join(model_dir, task_name + ".onnx")
-            if not os.path.exists(model_file_path):
-                raise Exception("not find model file path {}".format(model_file_path))
-        else:
-            model_file_path = os.path.join(model_dir, task_name + ".onnx")
-
-        if not os.path.exists(model_file_path):
-            raise ValueError("not find model file path {}".format(
-                model_file_path))
-        if False and ort.get_device() == "GPU":
-            options = ort.SessionOptions()
-            options.enable_cpu_mem_arena = False
-            self.ort_sess = ort.InferenceSession(model_file_path, options=options, providers=[('CUDAExecutionProvider')])
-        else:
-            self.ort_sess = ort.InferenceSession(model_file_path, providers=['CPUExecutionProvider'])
-        self.input_names = [node.name for node in self.ort_sess.get_inputs()]
-        self.output_names = [node.name for node in self.ort_sess.get_outputs()]
-        self.input_shape = self.ort_sess.get_inputs()[0].shape[2:4]
+            model_dir = os.path.join(ABS_PATH, "res/deepdoc")
+        if Recognizer._predictor.get(task_name) is None or Recognizer._input_tensor.get(task_name) is None:
+            if torch.cuda.is_available():
+                Recognizer._predictor[task_name], Recognizer._input_tensor[task_name] = load_model_cuda(model_dir,
+                                                                                                        task_name)
+            else:
+                Recognizer._predictor[task_name], Recognizer._input_tensor[task_name] = load_model(model_dir, task_name)
+        # if  ort.get_device() == "GPU":
+        #     options = ort.SessionOptions()
+        #     options.enable_cpu_mem_arena = False
+        #     self.ort_sess = ort.InferenceSession(model_file_path, options=options,
+        #                                          providers=[('CUDAExecutionProvider')])
+        # else:
+        #     self.ort_sess = ort.InferenceSession(model_file_path, providers=['CPUExecutionProvider'])
+        # self.input_shape = self.ort_sess.get_inputs()[0].shape[2:4]
+        self.input_shape = [640, 640]
         self.label_list = label_list
 
     @staticmethod
@@ -142,6 +168,8 @@ class Recognizer(object):
             if j >= min(i + far, len(layouts)):
                 i += 1
                 continue
+            # TODO: 这里是检查两个方框是否重合，是则删除小的那一个，保证不存在重复的文本，
+            #  但由于边框检测错误，有可能导致数据误删，这里先不处理
             if Recognizer.overlapped_area(layouts[i], layouts[j]) < thr \
                     and Recognizer.overlapped_area(layouts[j], layouts[i]) < thr:
                 i += 1
@@ -248,9 +276,10 @@ class Recognizer(object):
         if not boxes:
             return
         min_dis, min_i = 1000000, None
-        for i,b in enumerate(boxes):
+        for i, b in enumerate(boxes):
             if box.get("layoutno", "0") != b.get("layoutno", "0"): continue
-            dis = min(abs(box["x0"] - b["x0"]), abs(box["x1"] - b["x1"]), abs(box["x0"]+box["x1"] - b["x1"] - b["x0"])/2)
+            dis = min(abs(box["x0"] - b["x0"]), abs(box["x1"] - b["x1"]),
+                      abs(box["x0"] + box["x1"] - b["x1"] - b["x0"]) / 2)
             if dis < min_dis:
                 min_i = i
                 min_dis = dis
@@ -273,13 +302,14 @@ class Recognizer(object):
 
         return max_overlapped_i
 
-    def preprocess(self, image_list):
+    def preprocess(self, image_list, task_name):
         inputs = []
-        if "scale_factor" in self.input_names:
+        if "scale_factor" in self._input_tensor[task_name]:
             preprocess_ops = []
             for op_info in [
                 {'interp': 2, 'keep_ratio': False, 'target_size': [800, 608], 'type': 'LinearResize'},
-                {'is_scale': True, 'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225], 'type': 'StandardizeImage'},
+                {'is_scale': True, 'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225],
+                 'type': 'StandardizeImage'},
                 {'type': 'Permute'},
                 {'stride': 32, 'type': 'PadStride'}
             ]:
@@ -301,11 +331,11 @@ class Recognizer(object):
                 img /= 255.0
                 img = img.transpose(2, 0, 1)
                 img = img[np.newaxis, :, :, :].astype(np.float32)
-                inputs.append({self.input_names[0]: img, "scale_factor": [w/ww, h/hh]})
+                inputs.append({self._input_tensor[task_name][0]: img, "scale_factor": [w / ww, h / hh]})
         return inputs
 
-    def postprocess(self, boxes, inputs, thr):
-        if "scale_factor" in self.input_names:
+    def postprocess(self, boxes, inputs, thr, task_name):
+        if "scale_factor" in self._input_tensor[task_name]:
             bb = []
             for b in boxes:
                 clsid, bbox, score = int(b[0]), b[2:], b[1]
@@ -377,7 +407,8 @@ class Recognizer(object):
         # Get the class with the highest confidence
         class_ids = np.argmax(boxes[:, 4:], axis=1)
         boxes = boxes[:, :4]
-        input_shape = np.array([inputs["scale_factor"][0], inputs["scale_factor"][1], inputs["scale_factor"][0], inputs["scale_factor"][1]])
+        input_shape = np.array([inputs["scale_factor"][0], inputs["scale_factor"][1], inputs["scale_factor"][0],
+                                inputs["scale_factor"][1]])
         boxes = np.multiply(boxes, input_shape, dtype=np.float32)
         boxes = xywh2xyxy(boxes)
 
@@ -396,28 +427,23 @@ class Recognizer(object):
             "score": float(scores[i])
         } for i in indices]
 
-    def __call__(self, image_list, thr=0.7, batch_size=16):
+    def __call__(self, image_list, thr=0.7, batch_size=16, task_name="tsr"):
         res = []
         imgs = []
         for i in range(len(image_list)):
             if not isinstance(image_list[i], np.ndarray):
                 imgs.append(np.array(image_list[i]))
-            else: imgs.append(image_list[i])
+            else:
+                imgs.append(image_list[i])
 
         batch_loop_cnt = math.ceil(float(len(imgs)) / batch_size)
         for i in range(batch_loop_cnt):
             start_index = i * batch_size
             end_index = min((i + 1) * batch_size, len(imgs))
             batch_image_list = imgs[start_index:end_index]
-            inputs = self.preprocess(batch_image_list)
-            logger.info("preprocess")
+            inputs = self.preprocess(batch_image_list, task_name)
             for ins in inputs:
-                bb = self.postprocess(self.ort_sess.run(None, {k:v for k,v in ins.items() if k in self.input_names})[0], ins, thr)
+                output = self._predictor[task_name].run(None, {k: v for k, v in ins.items() if k in self._input_tensor[task_name]})
+                bb = self.postprocess(output[0], ins, thr, task_name)
                 res.append(bb)
-
-        #seeit.save_results(image_list, res, self.label_list, threshold=thr)
-
         return res
-
-
-

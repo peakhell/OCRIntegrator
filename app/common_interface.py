@@ -10,11 +10,11 @@ class OCRInterface(ABC):
     """
 
     @abstractmethod
-    def detect_text(self, file_type, file: Union[str, io.BytesIO]) -> dict:
+    def detect_text(self, file_type, file: Union[str, io.BytesIO], **kwargs) -> dict:
         pass
 
     @abstractmethod
-    def detect_layout(self, file_type: str, file: Union[str, io.BytesIO]) -> list[dict]:
+    def detect_layout(self, file_type: str, file: Union[str, io.BytesIO], **kwargs) -> list[dict]:
         """
         布局检测，输出格式如下：
         [{

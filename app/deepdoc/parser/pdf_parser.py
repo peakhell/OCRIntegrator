@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import hashlib
 import random
 import time
 
@@ -9,7 +8,6 @@ from io import BytesIO
 import torch
 import re
 import pdfplumber
-import logging
 from PIL import Image
 import numpy as np
 from timeit import default_timer as timer
@@ -20,20 +18,15 @@ from app.deepdoc.rag.nlp import rag_tokenizer
 from copy import deepcopy
 from app.constants import ABS_PATH
 
-logging.getLogger("pdfminer").setLevel(logging.WARNING)
-
 
 class RAGFlowPdfParser:
     def __init__(self):
         self.ocr = OCR()
-        if hasattr(self, "model_speciess"):
-            self.layouter = LayoutRecognizer("layout." + self.model_speciess)
-        else:
-            self.layouter = LayoutRecognizer("layout")
+        self.layouter = LayoutRecognizer("layout")
         self.tbl_det = TableStructureRecognizer()
-
         self.updown_cnt_mdl = xgb.Booster()
         if torch.cuda.is_available():
+            logger.info("loading updown_concat_xgb model Using CUDA")
             self.updown_cnt_mdl.set_param({"device": "cuda"})
         try:
             model_dir = os.path.join(ABS_PATH, "res/deepdoc")
@@ -149,7 +142,8 @@ class RAGFlowPdfParser:
         return True
 
     def _table_transformer_job(self, ZM):
-        logging.info("Table processing...")
+        logger.info("DETECT TABLE: start...")
+        start = time.time()
         imgs, pos = [], []
         tbcnt = [0]
         MARGIN = 10
@@ -238,17 +232,18 @@ class RAGFlowPdfParser:
                 b["H_left"] = spans[ii]["x0"]
                 b["H_right"] = spans[ii]["x1"]
                 b["SP"] = ii
+        logger.info(f"DETECT TABLE: finished in {time.time() - start :.4f}s")
 
     def _ocr(self, pagenum, img, chars, ZM=3):
-        start = time.time()
+        start = begin = time.time()
+
+        logger.info(f"################## start to process page {pagenum + self.page_from} ##################")
         bxs = self.ocr.detect(np.array(img))
-        logger.info("\n")
-        logger.info(f"################## start to process page {pagenum} ##################")
-        logger.info(f"detect page {pagenum} elapse time: {time.time() - start :.4f}s")
+        logger.info(f"OCR: detect cost: {time.time() - start :.4f}s")
         if not bxs:
             self.boxes.append([])
             return
-        bxs = [(line[0], line[1][0]) for line in bxs]
+        bxs = [(np.float16(line[0]), line[1][0]) for line in bxs]
         bxs = Recognizer.sort_Y_firstly(
             [{"x0": b[0][0] / ZM, "x1": b[1][0] / ZM,
               "top": b[0][1] / ZM, "text": "", "txt": t,
@@ -256,7 +251,6 @@ class RAGFlowPdfParser:
               "page_number": pagenum} for b, t in bxs if b[0][0] <= b[1][0] and b[0][1] <= b[-1][1]],
             self.mean_height[-1] / 3
         )
-
         # merge chars in the same rect
         start = time.time()
         for c in Recognizer.sort_X_firstly(chars, self.mean_width[pagenum - 1] // 4):
@@ -274,7 +268,7 @@ class RAGFlowPdfParser:
                     bxs[ii]["text"] += " "
             else:
                 bxs[ii]["text"] += c["text"]
-        logger.info(f"merge page {pagenum} elapse time: {time.time()-start :.4f}s")
+        logger.info(f"OCR: merge cost time: {time.time()-start :.4f}s")
         # 原本为一个box一个box推理，无法发挥GPU并行推理的优势， 这里改成按照batch_size=32进行推理，提高推理性能
         modify_idx = []
         matrix = []
@@ -286,29 +280,34 @@ class RAGFlowPdfParser:
                 matrix.append(np.array([[left, top], [right, top], [right, bott], [left, bott]], dtype=np.float32))
         start = time.time()
         text_result = self.ocr.recognize(np.array(img), matrix)
-        logger.info(f"recognize page {pagenum} elapse time: {time.time() - start :.4f}s")
+        logger.info(f"OCR: recognize cost time: {time.time() - start :.4f}s")
         for i, idx in enumerate(modify_idx):
             bxs[idx]["text"] = text_result[i]
         bxs = [b for b in bxs if b["text"]]
         if self.mean_height[-1] == 0:
             self.mean_height[-1] = np.median([b["bottom"] - b["top"]
                                               for b in bxs])
-        logger.info(f"################## process finished page {pagenum} ##################\n")
+        logger.info(f"OCR: finish cost: {time.time() - begin :.4f}s")
+        logger.info(f"################## process finished page {pagenum+self.page_from} ##################\n")
         self.boxes.append(bxs)
 
     def _layouts_rec(self, ZM, drop=True):
+        logger.info(f"LAYOUT: start...")
+        start = time.time()
         assert len(self.page_images) == len(self.boxes)
-        self.boxes, self.page_layout = self.layouter(
-            self.page_images, self.boxes, ZM, drop=drop)
+        self.boxes, self.page_layout = self.layouter(self.page_images, self.boxes, ZM, drop=drop)
         # cumlative Y
         for i in range(len(self.boxes)):
             self.boxes[i]["top"] += \
                 self.page_cum_height[self.boxes[i]["page_number"] - 1]
             self.boxes[i]["bottom"] += \
                 self.page_cum_height[self.boxes[i]["page_number"] - 1]
+        logger.info(f"LAYOUT: finished in {time.time() - start :.4f}s")
 
     def _text_merge(self):
         # merge adjusted boxes
+        logger.info("MERGE TEXT: start...")
+        start = time.time()
         bxs = self.boxes
 
         def end_with(b, txt):
@@ -361,6 +360,7 @@ class RAGFlowPdfParser:
                 bxs.pop(i + 1)
                 continue
             i += 1
+        logger.info(f"MERGE TEXT: finished in {time.time()-start :.4f}s")
         self.boxes = bxs
 
     def _naive_vertical_merge(self):
@@ -410,6 +410,8 @@ class RAGFlowPdfParser:
         self.boxes = bxs
 
     def _concat_downward(self, concat_between_pages=True):
+        logger.info("CONCAT_DOWNWARD: start...")
+        start = time.time()
         # count boxes in the same row as a feature
         for i in range(len(self.boxes)):
             mh = self.mean_height[self.boxes[i]["page_number"] - 1]
@@ -515,7 +517,7 @@ class RAGFlowPdfParser:
                         and c["layout_type"]:
                     t["layout_type"] = c["layout_type"]
             boxes.append(t)
-
+        logger.info(f"CONCAT_DOWNWARD: finished in {time.time() - start :.4f}s")
         self.boxes = Recognizer.sort_Y_firstly(boxes, 0)
 
     def _filter_forpages(self):
@@ -593,8 +595,9 @@ class RAGFlowPdfParser:
             b_["top"] = b["top"]
             self.boxes.pop(i)
 
-    def _extract_table_figure(self, need_image, ZM,
-                              return_html, need_position):
+    def _extract_table_figure(self, need_image, ZM, return_html, need_position):
+        logger.info("EXTRACT TABLE FIGURE: start...")
+        start = time.time()
         tables = {}
         figures = {}
         # extract figure and table boxes
@@ -694,14 +697,14 @@ class RAGFlowPdfParser:
             #    continue
             if tv < fv and tk:
                 tables[tk].insert(0, c)
-                logging.debug(
+                logger.debug(
                     "TABLE:" +
                     self.boxes[i]["text"] +
                     "; Cap: " +
                     tk)
             elif fk:
                 figures[fk].insert(0, c)
-                logging.debug(
+                logger.debug(
                     "FIGURE:" +
                     self.boxes[i]["text"] +
                     "; Cap: " +
@@ -728,7 +731,7 @@ class RAGFlowPdfParser:
                 if ii is not None:
                     b = louts[ii]
                 else:
-                    logging.warn(
+                    logger.warn(
                         f"Missing layout match: {pn + 1},%s" %
                         (bxs[0].get(
                             "layoutno", "")))
@@ -782,7 +785,7 @@ class RAGFlowPdfParser:
             positions.append(poss)
 
         assert len(positions) == len(res)
-
+        logger.info(f"EXTRACT TABLE FIGURE: finished in {time.time()-start :.4f}s")
         if need_position:
             return list(zip(res, positions))
         return res
@@ -886,7 +889,7 @@ class RAGFlowPdfParser:
                 if usefull(boxes[0]):
                     dfs(boxes[0], 0)
                 else:
-                    logging.debug("WASTE: " + boxes[0]["text"])
+                    logger.debug("WASTE: " + boxes[0]["text"])
             except Exception as e:
                 pass
             boxes.pop(0)
@@ -895,7 +898,7 @@ class RAGFlowPdfParser:
                 res.append(
                     "\n".join([c["text"] + self._line_tag(c, ZM) for c in lines]))
             else:
-                logging.debug("REMOVED: " +
+                logger.debug("REMOVED: " +
                               "<<".join([c["text"] for c in lines]))
 
         return "\n\n".join(res)
@@ -907,10 +910,10 @@ class RAGFlowPdfParser:
                 fnm) if not binary else pdfplumber.open(BytesIO(binary))
             return len(pdf.pages)
         except Exception as e:
-            logging.error(str(e))
+            logger.error(str(e))
 
-    def __images__(self, fnm, zoomin=3, page_from=0,
-                   page_to=299, callback=None):
+    def __images__(self, fnm, zoomin=3, page_from=0, page_to=299):
+        self.has_next = False
         self.lefted_chars = []
         self.mean_height = []
         self.mean_width = []
@@ -922,20 +925,24 @@ class RAGFlowPdfParser:
         try:
             st = time.time()
             self.pdf = pdfplumber.open(fnm) if isinstance(fnm, str) else pdfplumber.open(fnm)
-            logger.info(f"pdfplumber read cost time: {time.time() - st}")
             self.page_images = [p.to_image(resolution=72 * zoomin).annotated for i, p in
                                 enumerate(self.pdf.pages[page_from:page_to])]
             self.page_chars = [[c for c in page.chars if self._has_color(c)] for page in
                                self.pdf.pages[page_from:page_to]]
             self.total_page = len(self.pdf.pages)
+            logger.info(f"OCR: pdfplumber read cost time: {time.time() - st :.4f}s")
+            if page_to < self.total_page:
+                self.has_next = True
+            else:
+                self.has_next = False
         except Exception as e:
-            logging.error(str(e))
-
+            logger.error(str(e))
+        logger.info(f"OCR: start recognize page {page_from}-{min(page_to, self.total_page)}")
         self.outlines = []
         try:
             start = time.time()
             self.pdf = pdf2_read(fnm if isinstance(fnm, str) else fnm)
-            logger.info(f"pypdf2 read cost time: {time.time() - start}")
+            logger.info(f"OCR: pypdf2 read cost time: {time.time() - start :.4f}s")
             outlines = self.pdf.outline
 
             def dfs(arr, depth):
@@ -947,11 +954,10 @@ class RAGFlowPdfParser:
 
             dfs(outlines, 0)
         except Exception as e:
-            logging.warning(f"Outlines exception: {e}")
+            logger.warning(f"Outlines exception: {e}")
         if not self.outlines:
-            logging.warning(f"Miss outlines")
-
-        logging.info("Images converted.")
+            logger.warning(f"Miss outlines")
+        logger.info("Images converted.")
         self.is_english = [re.search(r"[a-zA-Z0-9,/¸;:'\[\]\(\)!@#$%^&*\"?<>._-]{30,}", "".join(
             random.choices([c["text"] for c in self.page_chars[i]], k=min(100, len(self.page_chars[i]))))) for i in
                            range(len(self.page_chars))]
@@ -960,7 +966,6 @@ class RAGFlowPdfParser:
             self.is_english = True
         else:
             self.is_english = False
-        self.is_english = False
 
         st = timer()
         for i, img in enumerate(self.page_images):
@@ -980,9 +985,7 @@ class RAGFlowPdfParser:
                                                                        chars[j]["width"]) / 2:
                     chars[j]["text"] += " "
                 j += 1
-            start = time.time()
             self._ocr(i + 1, img, chars, zoomin)
-            logger.info(f"OCR: page {i+1} cost time: {time.time() - start}")
         logger.info(f"OCR Elapsed Time: {timer()-st :.4f}")
 
         if not self.is_english and not any(
@@ -990,39 +993,64 @@ class RAGFlowPdfParser:
             bxes = [b for bxs in self.boxes for b in bxs]
             self.is_english = re.search(r"[\na-zA-Z0-9,/¸;:'\[\]\(\)!@#$%^&*\"?<>._-]{30,}",
                                         "".join([b["text"] for b in random.choices(bxes, k=min(30, len(bxes)))]))
-
-        logging.info(f"Is it English: {self.is_english}")
-
+        logger.info(f"OCR: Is it English: {self.is_english}")
         self.page_cum_height = np.cumsum(self.page_cum_height)
         assert len(self.page_cum_height) == len(self.page_images) + 1
+        logger.info(f"OCR: page {page_from}-{min(page_to, self.total_page)} finished")
         return self.boxes
 
-    def __call__(self, fnm, need_image=True, zoomin=3, return_html=False):
-        self.__images__(fnm, zoomin)
+    def ocr_detect(self, fnm, zoomin=3, page_from=0, page_to=299):
+        result = self.__images__(fnm, zoomin, page_from, page_to)
+        self.memory_gc()
+        return self.has_next, result
+
+    def memory_gc(self):
+        del self.lefted_chars
+        del self.mean_height
+        del self.mean_width
+        del self.boxes
+        del self.garbages
+        del self.page_cum_height
+        del self.page_layout
+        del self.outlines
+        del self.pdf
+        del self.page_images
+        del self.page_chars
+        del self.total_page
+        self.lefted_chars = []
+        self.mean_height = []
+        self.mean_width = []
+        self.boxes = []
+        self.garbages = {}
+        self.page_cum_height = [0]
+        self.page_layout = []
+        self.outlines = []
+        self.is_english = None
+        self.pdf = None
+        self.page_images = None
+        self.page_chars = None
+        self.total_page = None
+
+    def __call__(self, fnm, need_image=True, zoomin=3, return_html=True, page_from=0, page_to=None):
+        self.__images__(fnm, zoomin, page_from=page_from, page_to=page_to)
         self._layouts_rec(zoomin)
         self._table_transformer_job(zoomin)
         self._text_merge()
         # self._filter_forpages()
-        tbls = self._extract_table_figure(
-            need_image, zoomin, return_html, True)
+        tbls = self._extract_table_figure(need_image, zoomin, return_html, True)
         self._concat_downward()
         # return self.__filterout_scraps(deepcopy(self.boxes), zoomin), tbls
         tables = []
         for tbl in tbls:
-            # buffer = io.BytesIO()
-            # tbl[0][0].save(buffer, format='JPEG', quality=95)
-            # binary_data = buffer.getvalue()
-            # # 将二进制数据转换为 Base64 编码数据
-            # base64_data = base64.b64encode(binary_data).decode('utf-8')
-            # TODO 图片存储
             content = tbl[0][1]
-            img_id = hashlib.sha256("".join(content).encode("utf-8")).hexdigest()
-            tables.append({"content": content, "img_id": img_id, "posion": tbl[1]})
+            tables.append({"content": content, "position": tbl[1]})
         result = {
             "boxes": self.boxes,
-            "tables": tables
+            "tables": tables,
+            "page_cum_height": self.page_cum_height.tolist()
         }
-        return result
+        self.memory_gc()
+        return self.has_next, result
 
     def remove_tag(self, txt):
         return re.sub(r"@@[\t0-9.-]+?##", "", txt)
@@ -1146,9 +1174,9 @@ class PlainParser(object):
 
             dfs(outlines, 0)
         except Exception as e:
-            logging.warning(f"Outlines exception: {e}")
+            logger.warning(f"Outlines exception: {e}")
         if not self.outlines:
-            logging.warning(f"Miss outlines")
+            logger.warning(f"Miss outlines")
 
         return [(l, "") for l in lines], []
 

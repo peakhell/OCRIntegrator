@@ -4,7 +4,7 @@ from collections import Counter
 from copy import deepcopy
 import numpy as np
 from app.deepdoc.vision import Recognizer
-from app.config import logger
+from app.config.logger import logger
 
 from app.constants import ABS_PATH
 
@@ -31,10 +31,9 @@ class LayoutRecognizer(Recognizer):
         except Exception as e:
             logger.exception(f"model {model_dir} not fount")
             raise e
-
         self.garbage_layouts = ["footer", "header", "reference"]
 
-    def __call__(self, image_list, ocr_res, scale_factor=3, thr=0.2, batch_size=16, drop=True):
+    def __call__(self, image_list, ocr_res, scale_factor=3, thr=0.2, batch_size=16, drop=True, task_name="layout"):
         def __is_garbage(b):
             patt = [r"^•+$", r"(版权归©|免责条款|地址[:：])", r"\.{3,}", "^[0-9]{1,2} / ?[0-9]{1,2}$",
                     r"^[0-9]{1,2} of [0-9]{1,2}$", "^http://[^ ]{12,}",
@@ -43,7 +42,7 @@ class LayoutRecognizer(Recognizer):
                     ]
             return any([re.search(p, b["text"]) for p in patt])
 
-        layouts = super().__call__(image_list, thr, batch_size)
+        layouts = super().__call__(image_list, thr, batch_size, task_name)
         # save_results(image_list, layouts, self.labels, output_dir='output/', threshold=0.7)
         assert len(image_list) == len(ocr_res)
         # Tag layout type

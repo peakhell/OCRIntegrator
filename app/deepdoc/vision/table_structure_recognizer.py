@@ -1,4 +1,4 @@
-import logging
+from app.config.logger import logger
 import os
 import re
 from collections import Counter
@@ -22,12 +22,10 @@ class TableStructureRecognizer(Recognizer):
     ]
 
     def __init__(self):
-        super().__init__(self.labels, "tsr", os.path.join(
-            ABS_PATH,
-            "res/deepdoc"))
+        super().__init__(self.labels, "tsr", os.path.join(ABS_PATH, "res/deepdoc"))
 
     def __call__(self, images, thr=0.2):
-        tbls = super().__call__(images, thr)
+        tbls = super().__call__(images, thr, task_name="tsr")
         res = []
         # align left&right for rows, align top&bottom for columns
         for tbl in tbls:
@@ -131,7 +129,7 @@ class TableStructureRecognizer(Recognizer):
             b["btype"] = TableStructureRecognizer.blockType(b)
         max_type = Counter([b["btype"] for b in boxes]).items()
         max_type = max(max_type, key=lambda x: x[1])[0] if max_type else ""
-        logging.debug("MAXTYPE: " + max_type)
+        logger.debug("MAXTYPE: " + max_type)
 
         rowh = [b["R_bott"] - b["R_top"] for b in boxes if "R" in b]
         rowh = np.min(rowh) if rowh else 0
@@ -202,7 +200,7 @@ class TableStructureRecognizer(Recognizer):
                     j += 1
                     continue
                 bx = tbl[ii][j][0]
-                logging.debug("Relocate column single: " + bx["text"])
+                logger.debug("Relocate column single: " + bx["text"])
                 # j column only has one value
                 left, right = 100000, 100000
                 if j > 0 and not f:
@@ -266,7 +264,7 @@ class TableStructureRecognizer(Recognizer):
                     continue
 
                 bx = tbl[i][jj][0]
-                logging.debug("Relocate row single: " + bx["text"])
+                logger.debug("Relocate row single: " + bx["text"])
                 # i row only has one value
                 up, down = 100000, 100000
                 if i > 0 and not f:
@@ -423,7 +421,7 @@ class TableStructureRecognizer(Recognizer):
                                         + (de if headers[j - 1][k] else "") \
                                         + headers[j][k]
 
-        logging.debug(
+        logger.debug(
             f">>>>>>>>>>>>>>>>>{cap}：SIZE:{rowno}X{clmno} Header: {hdr_rowno}")
         row_txt = []
         for i in range(rowno):
