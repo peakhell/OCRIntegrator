@@ -248,7 +248,7 @@ class RAGFlowPdfParser:
             [{"x0": b[0][0] / ZM, "x1": b[1][0] / ZM,
               "top": b[0][1] / ZM, "text": "", "txt": t,
               "bottom": b[-1][1] / ZM,
-              "page_number": pagenum+self.page_from} for b, t in bxs if b[0][0] <= b[1][0] and b[0][1] <= b[-1][1]],
+              "page_number": pagenum} for b, t in bxs if b[0][0] <= b[1][0] and b[0][1] <= b[-1][1]],
             self.mean_height[-1] / 3
         )
         # merge chars in the same rect
@@ -738,7 +738,7 @@ class RAGFlowPdfParser:
 
                 left, top, right, bott = b["x0"], b["top"], b["x1"], b["bottom"]
                 if right < left: right = left + 1
-                poss.append((pn + self.page_from, left, right, top, bott))
+                poss.append([pn + self.page_from, left, right, top, bott])
                 return self.page_images[pn] \
                     .crop((left * ZM, top * ZM,
                            right * ZM, bott * ZM))
@@ -1063,8 +1063,8 @@ class RAGFlowPdfParser:
                 "#").strip("@").split("\t")
             left, right, top, bottom = float(left), float(
                 right), float(top), float(bottom)
-            poss.append(([int(p) - 1 for p in pn.split("-")],
-                         left, right, top, bottom))
+            poss.append([[int(p) - 1 for p in pn.split("-")],
+                         left, right, top, bottom])
         if not poss:
             if need_position:
                 return None, None
@@ -1077,8 +1077,8 @@ class RAGFlowPdfParser:
         poss.insert(0, ([pos[0][0]], pos[1], pos[2], max(
             0, pos[3] - 120), max(pos[3] - GAP, 0)))
         pos = poss[-1]
-        poss.append(([pos[0][-1]], pos[1], pos[2], min(self.page_images[pos[0][-1]].size[1] / ZM, pos[4] + GAP),
-                     min(self.page_images[pos[0][-1]].size[1] / ZM, pos[4] + 120)))
+        poss.append([[pos[0][-1]], pos[1], pos[2], min(self.page_images[pos[0][-1]].size[1] / ZM, pos[4] + GAP),
+                     min(self.page_images[pos[0][-1]].size[1] / ZM, pos[4] + 120)])
 
         positions = []
         for ii, (pns, left, right, top, bottom) in enumerate(poss):
@@ -1141,14 +1141,14 @@ class RAGFlowPdfParser:
         pn = bx["page_number"]
         top = bx["top"] - self.page_cum_height[pn - 1]
         bott = bx["bottom"] - self.page_cum_height[pn - 1]
-        poss.append((pn, bx["x0"], bx["x1"], top, min(
-            bott, self.page_images[pn - 1].size[1] / ZM)))
+        poss.append([pn, bx["x0"], bx["x1"], top, min(
+            bott, self.page_images[pn - 1].size[1] / ZM)])
         while bott * ZM > self.page_images[pn - 1].size[1]:
             bott -= self.page_images[pn - 1].size[1] / ZM
             top = 0
             pn += 1
-            poss.append((pn, bx["x0"], bx["x1"], top, min(
-                bott, self.page_images[pn - 1].size[1] / ZM)))
+            poss.append([pn, bx["x0"], bx["x1"], top, min(
+                bott, self.page_images[pn - 1].size[1] / ZM)])
         return poss
 
 

@@ -49,10 +49,15 @@ class DeepdocOCRAdapter(OCRInterface):
             while has_next:
                 has_next, data = self.pdf_parser.__call__(file_path, page_from=start_idx, zoomin=zoomin,
                                                           page_to=start_idx + OCR_BATCH_SIZE)
-                start_idx += OCR_BATCH_SIZE
+                for each in data["boxes"]:
+                    each["page_number"] += start_idx
+                for each in data["tables"]:
+                    for page in each["position"]:
+                        page[0] += start_idx
                 result["boxes"].extend(data["boxes"])
                 result["tables"].extend(data["tables"])
                 result["page_cum_height"].extend(data["page_cum_height"])
+                start_idx += OCR_BATCH_SIZE
             # return self.pdf_parser.__call__(file_path)
             logger.info(f"{file_path}处理完成, 耗时: {time.time() - start :.4f}s")
             return result
